@@ -1,5 +1,5 @@
 {
-  "name": "react-electron",
+  "name": "excel-national-identity-validator-react-electron",
   "main": "public/electron.js",
   "homepage": "./",
   "version": "0.2.0",

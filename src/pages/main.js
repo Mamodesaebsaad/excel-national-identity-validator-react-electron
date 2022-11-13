@@ -3,10 +3,8 @@ import { Button } from "@material-ui/core";
 import Spreadsheet from "react-spreadsheet";
 import * as XLSX from "xlsx";
 import validateNationalIdentityNumber from "national-identity-validator";
-import './Upload.css';
+import "./Upload.css";
 var FileSaver = require("file-saver");
-
-
 
 const Main = () => {
   const [selectedFile, setSelectedFile] = useState();
@@ -62,10 +60,7 @@ const Main = () => {
     if (file.length > 0) {
       let newArray = [];
       file.map((element) => {
-        newArray.push([
-          { value: element.id },
-          { value: element.result },
-        ]);
+        newArray.push([{ value: element.id }, { value: element.result }]);
       });
 
       if (newArray.length === file.length) {
@@ -137,6 +132,12 @@ const Main = () => {
     FileSaver.saveAs(data, filename + "_modified" + fileExtension);
   };
 
+  const resetAll = () => {
+    // setNewData([]);
+    // setProcessValue([]);
+    // setSelectedFile();
+    window.location.reload();
+  };
   return (
     <div
       style={{
@@ -184,7 +185,9 @@ const Main = () => {
 
               <input type="file" hidden />
               <span className="support">Supports: xlsx</span>
-              <span className="support">{selectedFile?.name}</span>
+              <span className="support">
+                {!!selectedFile && selectedFile?.name}
+              </span>
             </div>
           </div>
         </div>
@@ -205,11 +208,24 @@ const Main = () => {
         >
           Download
         </Button>
+
+        <Button
+          style={{ marginTop: "20px" }}
+          variant="contained"
+          fullWidth
+          onClick={resetAll}
+        >
+          Reset
+        </Button>
       </div>
 
-      <div style={{ marginTop: "10px" }}>
-        <Spreadsheet data={newData} />
-      </div>
+      {newData?.length > 0 && (
+        <div
+          style={{ marginTop: "10px", overflowY: "scroll", height: "250px" }}
+        >
+          <Spreadsheet data={newData} />
+        </div>
+      )}
     </div>
   );
 };
