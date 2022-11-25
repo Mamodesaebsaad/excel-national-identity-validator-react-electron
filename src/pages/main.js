@@ -4,18 +4,15 @@ import Spreadsheet from "react-spreadsheet";
 import * as XLSX from "xlsx";
 import validateNationalIdentityNumber from "national-identity-validator";
 import "./Upload.css";
-import exportExcel from '../utils/index.js';
+import exportExcel from "../utils/index.js";
 import fileTemplate from "../template/template-excel.xlsx";
 var FileSaver = require("file-saver");
-
 
 const Main = () => {
   const [selectedFile, setSelectedFile] = useState();
   const [processValue, setProcessValue] = useState([]);
   const [newData, setNewData] = useState([]);
   const [verifyData, setVerifyData] = useState(false);
-
-
 
   const dropHandler = (e) => {
     e.preventDefault();
@@ -106,16 +103,22 @@ const Main = () => {
 
     fileReader.onload = (e) => {
       const bufferArray = e?.target.result;
-      const wb = XLSX.read(bufferArray, { type: "buffer" });
+      const wb = XLSX.read(bufferArray, {
+        // type: "buffer",
+        cellDates: true,
+        dateNF: "dd/mm/yy"
+      });
       const wsname = wb.SheetNames[0];
       const ws = wb.Sheets[wsname];
 
       const data = XLSX.utils.sheet_to_json(ws);
       let newArray = [];
       data.forEach((element) => {
+        console.log(element?.dob);
         if (element["id"]) {
           let value = validateNationalIdentityNumber(
-            element["id"]?.toUpperCase()
+            element["id"]?.toUpperCase(),
+            element["surname"] && element["surname"]?.toUpperCase()
           );
 
           value
@@ -132,6 +135,24 @@ const Main = () => {
       });
       setProcessValue(newArray);
     };
+  };
+
+  const downloadTemplateExcel = () => {
+    const fileType =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+
+    const value = [{ id: "", surname: "", dob: "" }];
+
+    const val = XLSX.utils.json_to_sheet(value);
+    const wb = { Sheets: { data: val }, SheetNames: ["sheet1"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, val, "Sheet1");
+    XLSX.writeFile(workbook, "template-excel.xlsx", { compression: true });
+    // FileSaver.saveAs(data, "template-excel" + fileExtension);
   };
 
   const readExcelJsonData = (filename, verifyValue) => {
@@ -163,14 +184,19 @@ const Main = () => {
     >
       <div>
         <Button
-          style={{ marginTop: "20px", marginBottom: '20px', backgroundColor: '#70C369', color: 'white' }}
+          style={{
+            marginTop: "20px",
+            marginBottom: "20px",
+            backgroundColor: "#70C369",
+            color: "white",
+          }}
           variant="contained"
           fullWidth
-          onClick={() => readToCSV(processValue, true)}
+          onClick={downloadTemplateExcel}
         >
           Download Excel Template
         </Button>
-       {exportExcel(fileTemplate)}
+        {exportExcel(fileTemplate)}
         <div className="top">
           <div
             style={{
