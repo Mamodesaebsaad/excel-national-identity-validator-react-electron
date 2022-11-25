@@ -4,12 +4,18 @@ import Spreadsheet from "react-spreadsheet";
 import * as XLSX from "xlsx";
 import validateNationalIdentityNumber from "national-identity-validator";
 import "./Upload.css";
+import exportExcel from '../utils/index.js';
+import fileTemplate from "../template/template-excel.xlsx";
 var FileSaver = require("file-saver");
+
 
 const Main = () => {
   const [selectedFile, setSelectedFile] = useState();
   const [processValue, setProcessValue] = useState([]);
   const [newData, setNewData] = useState([]);
+  const [verifyData, setVerifyData] = useState(false);
+
+
 
   const dropHandler = (e) => {
     e.preventDefault();
@@ -56,7 +62,9 @@ const Main = () => {
     readExcel(e.target.files[0]);
   };
 
-  const readToCSV = (file) => {
+  const readToCSV = (file, checkValue) => {
+    checkValue && setVerifyData(true);
+
     if (file.length > 0) {
       let newArray = [];
       file.map((element) => {
@@ -106,10 +114,16 @@ const Main = () => {
       let newArray = [];
       data.forEach((element) => {
         if (element["id"]) {
-          let value = validateNationalIdentityNumber(element["id"]);
+          let value = validateNationalIdentityNumber(
+            element["id"]?.toUpperCase()
+          );
 
           value
-            ? newArray.push({ ...element, result: value == true && "Valid" })
+            ? newArray.push({
+                ...element,
+                id: element?.id?.toUpperCase(),
+                result: value == true && "Valid",
+              })
             : newArray.push({
                 ...element,
                 result: value == false && "Invalid",
@@ -133,9 +147,7 @@ const Main = () => {
   };
 
   const resetAll = () => {
-    // setNewData([]);
-    // setProcessValue([]);
-    // setSelectedFile();
+    setVerifyData(false);
     window.location.reload();
   };
   return (
@@ -150,6 +162,15 @@ const Main = () => {
       }}
     >
       <div>
+        <Button
+          style={{ marginTop: "20px", marginBottom: '20px', backgroundColor: '#70C369', color: 'white' }}
+          variant="contained"
+          fullWidth
+          onClick={() => readToCSV(processValue, true)}
+        >
+          Download Excel Template
+        </Button>
+       {exportExcel(fileTemplate)}
         <div className="top">
           <div
             style={{
@@ -192,31 +213,38 @@ const Main = () => {
           </div>
         </div>
 
-        <Button
-          style={{ marginTop: "20px" }}
-          variant="contained"
-          fullWidth
-          onClick={() => readToCSV(processValue)}
-        >
-          VERIFY
-        </Button>
-        <Button
-          style={{ marginTop: "20px" }}
-          variant="contained"
-          fullWidth
-          onClick={() => readExcelJsonData(selectedFile.name, processValue)}
-        >
-          Download
-        </Button>
+        {!!selectedFile && (
+          <Button
+            style={{ marginTop: "20px" }}
+            variant="contained"
+            fullWidth
+            onClick={() => readToCSV(processValue, true)}
+          >
+            VERIFY
+          </Button>
+        )}
 
-        <Button
-          style={{ marginTop: "20px" }}
-          variant="contained"
-          fullWidth
-          onClick={resetAll}
-        >
-          Reset
-        </Button>
+        {!!verifyData && (
+          <Button
+            style={{ marginTop: "20px" }}
+            variant="contained"
+            fullWidth
+            onClick={() => readExcelJsonData(selectedFile.name, processValue)}
+          >
+            Download
+          </Button>
+        )}
+
+        {!!selectedFile && (
+          <Button
+            style={{ marginTop: "20px" }}
+            variant="contained"
+            fullWidth
+            onClick={resetAll}
+          >
+            Reset
+          </Button>
+        )}
       </div>
 
       {newData?.length > 0 && (
