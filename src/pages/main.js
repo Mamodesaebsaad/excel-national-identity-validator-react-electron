@@ -22,16 +22,12 @@ const Main = () => {
         // If dropped items aren't files, reject them
         if (item.kind === "file") {
           const file = item.getAsFile();
-          // console.log(file);
-          // console.log(file?.name)
+
           setSelectedFile(file);
-          //   console.log(file?.name);
-          // setSelectedFile(e.target.files[0]);
+
           readExcel(file);
           readToCSV(file);
           readExcel(file);
-
-          // console.log(`… file[${i}].name = ${file.name}`);
         }
       });
     } else {
@@ -64,8 +60,54 @@ const Main = () => {
 
     if (file.length > 0) {
       let newArray = [];
+      // const fileReader = new FileReader();
+      // fileReader.readAsArrayBuffer(file);
+
+      // fileReader.onload = (e) => {
+      //   const bufferArray = e?.target.result;
+      //   const wb = XLSX.read(bufferArray, {
+      //     // type: "buffer",
+      //     cellDates: true,
+      //     dateNF: "dd/mm/yy",
+      //   });
+
+      //   const wsname = wb.SheetNames[0];
+      //   const ws = wb.Sheets[wsname];
+
+      //   const data = XLSX.utils.sheet_to_json(ws);
+
+      //   data.map((element) => {
+      //     let tempDate = element?.dob?.getDate()?.toString();
+      //     let tempMonth = element?.dob?.getMonth() + 1;
+      //     let tempYear = element?.dob?.getFullYear().toString();
+      //     let tempDOB = tempDate + "/" + tempMonth + "/" + tempYear;
+
+      //     newArray.push([
+      //       { value: element.id },
+      //       { value: element.surname },
+      //       { value: tempDOB },
+      //       { value: element.result },
+      //     ]);
+      //   });
+      //   if (newArray.length === file.length) {
+      //     setNewData(newArray);
+      //   }
+      // };
+
       file.map((element) => {
-        newArray.push([{ value: element.id }, { value: element.result }]);
+        let tempDate = element?.dob?.getDate()?.toString();
+        let tempMonth = element?.dob?.getMonth() + 1;
+        let tempYear = element?.dob?.getFullYear().toString();
+        let tempDOB = element?.dob
+          ? tempDate + "/" + tempMonth + "/" + tempYear
+          : "";
+
+        newArray.push([
+          { value: element.id },
+          { value: element.surname },
+          { value: tempDOB },
+          { value: element.result },
+        ]);
       });
 
       if (newArray.length === file.length) {
@@ -78,15 +120,26 @@ const Main = () => {
       fileReader.onload = (e) => {
         let newArray = [];
         const bufferArray = e?.target.result;
-        const wb = XLSX.read(bufferArray, { type: "buffer" });
+        const wb = XLSX.read(bufferArray, {
+          // type: "buffer",
+          cellDates: true,
+          dateNF: "dd/mm/yy",
+        });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
 
         const data = XLSX.utils.sheet_to_json(ws);
         data.map((element) => {
+          let tempDate = element?.dob?.getDate()?.toString();
+          let tempMonth = element?.dob?.getMonth() + 1;
+          let newTempMonth = tempMonth < 10 ? "0" + tempMonth : tempMonth;
+          let tempYear = element?.dob?.getFullYear().toString();
+          let tempDOB = tempDate + "/" + newTempMonth + "/" + tempYear;
+
           newArray.push([
             { value: element.id },
-            // { value: element["First Name"] },
+            { value: element["surname"] },
+            { value: element["dob"] ? tempDOB : "" },
           ]);
         });
 
@@ -106,7 +159,7 @@ const Main = () => {
       const wb = XLSX.read(bufferArray, {
         // type: "buffer",
         cellDates: true,
-        dateNF: "dd/mm/yy"
+        dateNF: "dd/mm/yy",
       });
       const wsname = wb.SheetNames[0];
       const ws = wb.Sheets[wsname];
@@ -114,11 +167,17 @@ const Main = () => {
       const data = XLSX.utils.sheet_to_json(ws);
       let newArray = [];
       data.forEach((element) => {
-        console.log(element?.dob);
+        let tempDate = element?.dob?.getDate()?.toString();
+        let tempMonth = element?.dob?.getMonth() + 1;
+        let newTempMonth = tempMonth < 10 ? "0" + tempMonth : tempMonth;
+        let tempYear = element?.dob?.getFullYear().toString();
+        let tempDOB = tempDate + "/" + newTempMonth + "/" + tempYear;
+
         if (element["id"]) {
           let value = validateNationalIdentityNumber(
             element["id"]?.toUpperCase(),
-            element["surname"] && element["surname"]?.toUpperCase()
+            element["surname"] && element["surname"]?.toUpperCase(),
+            element["dob"] && tempDOB
           );
 
           value
