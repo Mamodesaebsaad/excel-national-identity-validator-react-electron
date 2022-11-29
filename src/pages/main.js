@@ -95,10 +95,10 @@ const Main = () => {
       // };
 
       file.map((element) => {
-        let tempDate = element?.dob?.getDate()?.toString();
-        let tempMonth = element?.dob?.getMonth() + 1;
-        let tempYear = element?.dob?.getFullYear().toString();
-        let tempDOB = element?.dob
+        let tempDate = element?.dob?.length > 0 && element?.dob?.getDate()?.toString();
+        let tempMonth = element?.dob?.length > 0 && element?.dob?.getMonth() + 1;
+        let tempYear = element?.dob?.length > 0 && element?.dob?.getFullYear().toString();
+        let tempDOB = element?.dob?.length > 0
           ? tempDate + "/" + tempMonth + "/" + tempYear
           : "";
 
@@ -130,11 +130,12 @@ const Main = () => {
 
         const data = XLSX.utils.sheet_to_json(ws);
         data.map((element) => {
-          let tempDate = element?.dob?.getDate()?.toString();
-          let tempMonth = element?.dob?.getMonth() + 1;
-          let newTempMonth = tempMonth < 10 ? "0" + tempMonth : tempMonth;
-          let tempYear = element?.dob?.getFullYear().toString();
-          let tempDOB = tempDate + "/" + newTempMonth + "/" + tempYear;
+          console.log(element)
+          let tempDate = element?.dob?.length > 0 && element?.dob?.getDate()?.toString();
+          let tempMonth =element?.dob?.length > 0 && element?.dob?.getMonth() + 1;
+          let newTempMonth =element?.dob?.length > 0 && tempMonth < 10 ? "0" + tempMonth : tempMonth;
+          let tempYear =element?.dob?.length > 0 && element?.dob?.getFullYear().toString();
+          let tempDOB = element?.dob?.length > 0 && tempDate + "/" + newTempMonth + "/" + tempYear;
 
           newArray.push([
             { value: element.id },
@@ -167,11 +168,11 @@ const Main = () => {
       const data = XLSX.utils.sheet_to_json(ws);
       let newArray = [];
       data.forEach((element) => {
-        let tempDate = element?.dob?.getDate()?.toString();
-        let tempMonth = element?.dob?.getMonth() + 1;
-        let newTempMonth = tempMonth < 10 ? "0" + tempMonth : tempMonth;
-        let tempYear = element?.dob?.getFullYear().toString();
-        let tempDOB = tempDate + "/" + newTempMonth + "/" + tempYear;
+        let tempDate = element?.dob?.length > 0 && element?.dob?.getDate()?.toString();
+        let tempMonth = element?.dob?.length > 0 && element?.dob?.getMonth() + 1;
+        let newTempMonth = element?.dob?.length > 0 && tempMonth < 10 ? "0" + tempMonth : tempMonth;
+        let tempYear = element?.dob?.length > 0 && element?.dob?.getFullYear().toString();
+        let tempDOB = element?.dob?.length > 0 && tempDate + "/" + newTempMonth + "/" + tempYear;
 
         if (element["id"]) {
           let value = validateNationalIdentityNumber(
