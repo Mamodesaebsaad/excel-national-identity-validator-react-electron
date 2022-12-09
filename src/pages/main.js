@@ -95,19 +95,30 @@ const Main = () => {
       // };
 
       file.map((element) => {
-        let tempDate = element?.dob?.length > 0 && element?.dob?.getDate()?.toString();
-        let tempMonth = element?.dob?.length > 0 && element?.dob?.getMonth() + 1;
-        let tempYear = element?.dob?.length > 0 && element?.dob?.getFullYear().toString();
-        let tempDOB = element?.dob?.length > 0
-          ? tempDate + "/" + tempMonth + "/" + tempYear
-          : "";
+        console.log("date is: ", element.dob )
+        try{
+          let tempDate = element?.dob && element?.dob?.getDate() + 1;
+          let tempMonth = element?.dob && element?.dob?.getMonth() + 1;
+          let tempYear = element?.dob && element?.dob?.getFullYear().toString();
+          let tempDOB = element?.dob
+            ? tempDate.toString() + "/" + tempMonth + "/" + tempYear
+            : "";
+            newArray.push([
+              { value: element.id },
+              // { value: element.surname },
+              { value: tempDOB.toString() },
+              { value: element.result },
+            ]);
+        }
+        catch(e){
+          newArray.push([
+            { value: element.id },
+            // { value: element.surname },
+            { value: element?.dob },
+            { value: element.result },
+          ]);
+        }
 
-        newArray.push([
-          { value: element.id },
-          { value: element.surname },
-          { value: tempDOB },
-          { value: element.result },
-        ]);
       });
 
       if (newArray.length === file.length) {
@@ -122,24 +133,32 @@ const Main = () => {
         const bufferArray = e?.target.result;
         const wb = XLSX.read(bufferArray, {
           // type: "buffer",
+          type: 'binary',
           cellDates: true,
-          dateNF: "dd/mm/yy",
+          dateNF: "dd/mm/yy hh:mm:ss",
         });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
 
         const data = XLSX.utils.sheet_to_json(ws);
         data.map((element) => {
-          console.log(element)
-          let tempDate = element?.dob?.length > 0 && element?.dob?.getDate()?.toString();
-          let tempMonth =element?.dob?.length > 0 && element?.dob?.getMonth() + 1;
-          let newTempMonth =element?.dob?.length > 0 && tempMonth < 10 ? "0" + tempMonth : tempMonth;
-          let tempYear =element?.dob?.length > 0 && element?.dob?.getFullYear().toString();
-          let tempDOB = element?.dob?.length > 0 && tempDate + "/" + newTempMonth + "/" + tempYear;
+          console.log(element);
+          console.log(element.dob.getDate());
+          let tempDate = element?.dob && element?.dob?.getDate() + 1;
+          let tempMonth =element?.dob && element?.dob?.getMonth() + 1;
+          let newTempMonth =element?.dob && tempMonth < 10 ? "0" + tempMonth : tempMonth;
+          let tempYear =element?.dob && element?.dob?.getFullYear().toString();
+          let tempDOB;
+          console.log(element.dob)
+          if(element?.dob){
+            tempDOB = tempDate.toString() + "/" + newTempMonth + "/" + tempYear;
+          }
+          // = element?.dob?.length > 0 && tempDate + "/" + newTempMonth + "/" + tempYear;
 
+          console.log(tempDOB);
           newArray.push([
             { value: element.id },
-            { value: element["surname"] },
+            // { value: element["surname"] },
             { value: element["dob"] ? tempDOB : "" },
           ]);
         });
@@ -168,27 +187,36 @@ const Main = () => {
       const data = XLSX.utils.sheet_to_json(ws);
       let newArray = [];
       data.forEach((element) => {
-        let tempDate = element?.dob?.length > 0 && element?.dob?.getDate()?.toString();
-        let tempMonth = element?.dob?.length > 0 && element?.dob?.getMonth() + 1;
-        let newTempMonth = element?.dob?.length > 0 && tempMonth < 10 ? "0" + tempMonth : tempMonth;
-        let tempYear = element?.dob?.length > 0 && element?.dob?.getFullYear().toString();
-        let tempDOB = element?.dob?.length > 0 && tempDate + "/" + newTempMonth + "/" + tempYear;
+        console.log(element?.dob);
+        let tempDate =  element?.dob?.getDate()+1;
+        let tempMonth =  element?.dob?.getMonth() + 1;
+        let newTempMonth = tempMonth < 10 ? "0" + tempMonth : tempMonth;
+        let tempYear =  element?.dob?.getFullYear().toString();
+        let tempDOB =  tempDate.toString() + "/" + newTempMonth + "/" + tempYear;
+
 
         if (element["id"]) {
+          console.log("NID: ",  element["id"]?.toUpperCase());
+          console.log("Date: ", tempDOB);
+          // let value = validateNationalIdentityNumber("M2006980102769", "", "20/12/1999")
           let value = validateNationalIdentityNumber(
             element["id"]?.toUpperCase(),
-            element["surname"] && element["surname"]?.toUpperCase(),
-            element["dob"] && tempDOB
+            "",
+            // element["surname"] && element["surname"]?.toUpperCase(),
+           tempDOB
           );
+          console.log("value is: " + value);
 
           value
             ? newArray.push({
                 ...element,
                 id: element?.id?.toUpperCase(),
+                dob: tempDOB,
                 result: value == true && "Valid",
               })
             : newArray.push({
                 ...element,
+                dob: tempDOB,
                 result: value == false && "Invalid",
               });
         }
@@ -202,7 +230,9 @@ const Main = () => {
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
 
-    const value = [{ id: "", surname: "", dob: "" }];
+    // const value = [{ id: "", surname: "", dob: "" }];
+    const value = [{ id: "", dob: "" }];
+
 
     const val = XLSX.utils.json_to_sheet(value);
     const wb = { Sheets: { data: val }, SheetNames: ["sheet1"] };
