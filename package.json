@@ -2,7 +2,7 @@
   "name": "excel-national-identity-validator-react-electron",
   "main": "public/electron.js",
   "homepage": "./",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.7.0",
